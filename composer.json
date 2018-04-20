@@ -1,0 +1,22 @@
+{
+    "name": "dyned/vasara",
+    "description": "Extract postman json file to user demand",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sabar Tampubolon",
+            "email": "stampubolon@dyned.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "illuminate/support": "^5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "DynEd\\Vasara\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
