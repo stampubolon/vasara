@@ -116,7 +116,7 @@ class Vasara
      *
      * @return bool
      */
-    public function itemsExist()
+    public function itemExist()
     {
         return (bool) count($this->getPostmanItem());
     }
