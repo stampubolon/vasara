@@ -112,6 +112,16 @@ class Vasara
     }
 
     /**
+     * Check if item exist
+     *
+     * @return bool
+     */
+    public function itemsExist()
+    {
+        return (bool) count($this->getPostmanItem());
+    }
+
+    /**
      * Extract each items of postman
      *
      * @param $items
