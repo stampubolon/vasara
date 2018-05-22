@@ -2,6 +2,8 @@
 
 namespace DynEd\Vasara;
 
+use DynEd\Vasara\Exceptions\DriverOutOfBoundException;
+
 class Vasara
 {
     /**
@@ -40,69 +42,75 @@ class Vasara
     private $host = 'http://localhost';
 
     /**
-     * Beacon constructor
+     * All available drivers
      *
-     * @param BaseHandler $handler
+     * @var array
      */
-    public function __construct($postmanJson)
+    private $availableDriver = ['postman'];
+
+    var     $vasaraJson      = null;
+
+    var     $vasaraObject    = null;
+
+    var     $driver          = '';
+
+    /**
+     * Vasara constructor.
+     *
+     * @param $json
+     * @param null $driver
+     * @throws DriverOutOfBoundException|mixed
+     */
+    public function __construct($json, $driver = null)
     {
-        // Extract input value
-        $postman = json_decode($postmanJson);
+        // Use driver from config if not setup
+        if ( ! $driver) {
+            $driver = config('vasara.driver');
+        }
 
-        // Separate all element to each variable
-        $this->postmanInfo = $postman->info;
-        $this->postmanItem = $postman->item;
-        $this->postmanEvent = $postman->event;
+        // Throw exception if driver not available
+        if ( ! in_array($driver, $this->availableDriver)) {
+            throw new DriverOutOfBoundException();
+        }
 
-        // Define items as collection
-        $this->items = collect([]);
+        $this->driver = $driver;
+
+        $this->vasaraJson = $json;
     }
 
     /**
-     * Return postman info
-     *
-     * @return null
+     * Instantiate driver and process file immidiately
      */
-    public function getPostmanInfo()
+    public function run()
     {
-        return $this->postmanInfo;
+        // Change first character to uppercase
+        $class = 'DynEd\\Vasara\\Drivers\\' . ucfirst($this->driver);
+
+        $this->vasaraObject = new $class(json_decode($this->vasaraJson), $this->host);
     }
 
     /**
-     * Return postman item
+     * Return vasara info
      *
-     * @return \Illuminate\Support\Collection|null
+     * @return mixed
      */
-    public function getPostmanItem()
+    public function getInfo()
     {
-        return $this->postmanItem;
+        return $this->vasaraObject->getInfo();
     }
 
     /**
-     * Return postman event
+     * Return all in proper format routes
      *
-     * @return \Illuminate\Support\Collection|null
-     */
-    public function getPostmanEvent()
-    {
-        return $this->postmanEvent;
-    }
-
-    /**
-     * Return all items of postman
-     * Extract item before return it
-     *
-     * @return \Illuminate\Support\Collection|null
+     * @return mixed
      */
     public function getRoutes()
     {
-        $this->extractItemRoutes();
-
-        return $this->items;
+        return $this->vasaraObject->getRoutes();
     }
 
     /**
-     * Change host of postman url
+     * Change host of url
      *
      * @param $host
      */
@@ -112,100 +120,12 @@ class Vasara
     }
 
     /**
-     * Check if item exist
+     * Check if route exist
      *
      * @return bool
      */
-    public function itemExist()
+    public function routeExist()
     {
-        return (bool) count($this->getPostmanItem());
-    }
-
-    /**
-     * Extract each items of postman
-     *
-     * @param $items
-     */
-    public function extractItemRoutes($items = null)
-    {
-        // Use postman item if items param not defined
-        $items = $items ?: $this->postmanItem;
-
-        foreach ($items as $key => $item) {
-            if (key_exists('item', $item)) {
-                // Item element mean this is a folder
-                $this->extractItemRoutes($item->item);
-            } else {
-                // This is item from a folder or postman
-                $_item = new \stdClass();
-                $_item->name = $item->name;
-                $_item->description = property_exists($item->request, 'description') ? $item->request->description : '';
-                $_item->method = $item->request->method;
-                $_item->header = $this->convertPostmanBody($item->request->header);
-                $_item->body = $this->convertPostmanBody($item->request->body);
-
-                $_item->url = new \stdClass();
-                $_item->url->host = $this->isValidUri(implode('/', $item->request->url->host)) ? implode('/', $item->request->url->host) : $this->host;
-                $_item->url->path = implode('/', $item->request->url->path);
-                $_item->url->full = $_item->url->host . '/' . $_item->url->path;
-
-                $this->items->push($_item);
-            }
-        }
-    }
-
-    /**
-     * Convert body params from postman json
-     *
-     * @param array $postmanBody
-     * @return string
-     */
-    protected function convertPostmanBody($postmanBody = [])
-    {
-        return (optional($postmanBody)->{optional($postmanBody)->mode} ?
-            $this->concatPostmanArray(optional($postmanBody)->{optional($postmanBody)->mode}) :
-            json_encode([]));
-    }
-
-    /**
-     * Convert header params from postman json
-     *
-     * @param array $postmanHeader
-     * @return string
-     */
-    protected function convertPostmanHeader($postmanHeader = [])
-    {
-        return (optional($postmanHeader) ? $this->concatPostmanArray($postmanHeader) : json_encode([]));
-    }
-
-    /**
-     * Convert inputted value to postman json
-     *
-     * @param $postmanArray
-     * @return string
-     */
-    protected function concatPostmanArray($postmanArray = [])
-    {
-        $return = [];
-
-        foreach ($postmanArray as $postmanElement) {
-            // Authorization defined in project headers
-            if ($postmanElement->key != 'Authorization') {
-                $return[$postmanElement->key] = $postmanElement->value;
-            }
-        }
-
-        return json_encode($return);
-    }
-
-    /**
-     * Validating uri
-     *
-     * @param $uri
-     * @return mixed
-     */
-    private function isValidUri($uri)
-    {
-        return filter_var($uri, FILTER_VALIDATE_URL);
+        return $this->vasaraObject->routeExist();
     }
 }

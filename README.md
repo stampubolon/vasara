@@ -1,8 +1,11 @@
 # Vasara
-Vasara (finnish: hammer) Extract postman json file for easy access by user and ignore unused element of postman.
+Vasara (finnish: hammer) Extract Rest API json file for easy access by user and ignore unused element.
 
 ## Getting Started
-This package use for laravel only (lumen not tested yet). Extracting a single postman json file to an object. Separate postman value to info, item, and event. All element postman route located in item.
+This package use for laravel only (lumen not tested yet). Extracting a single Rest API json file to an object. Separate value to info, and routes.
+
+## Rest API Json FIle
+Now only support postman file. Will update for another json file.
 
 ### Install
 Install this package with composer using command below.
@@ -11,48 +14,46 @@ composer require dyned/vasara
 ```
 
 ### How to use
-Instantiate a vasara object with postman json content.
+Instantiate a vasara object with json content.
 ```
-$vasara = new Vasara($postmanJson);
+$vasara = new Vasara($json);
 ```
+
 Or
+
 You can create it by access file directly using laravel File Facades.
 ```
 $file = File::get('/path/to/postman/json/file.json');
 
 $vasara = new Vasara($file);
 ```
-Check postman item existence to return laravel abort function.
+
+Change host of url with proper url
 ```
-if ( ! $vasara->itemExist()) {
-    abort(404, 'Postman item not found');
+$vasara->changeHost('http://localhost:8181');
+```
+
+Tell vasara to collect all data from json file
+```
+$vasara->run();
+```
+
+Check postman route existence to return laravel abort function.
+```
+if ( ! $vasara->routeExist()) {
+    abort(404, 'Route not found');
 }
 ```
 
-Retrieve all routes from postman.
+Retrieve all routes from json.
 ```
 $vasara->getRoutes();
 ```
 
 ### Another functions
-* Retrieve all postman informations.
+* Retrieve all informations.
     ```
-    $vasara->getPostmanInfo();
-    ```
-    
-* Retireve all postman items
-    ```
-    $vasara->getPostmanItem();
-    ```
-
-* Retrieve all postman events.
-    ```
-    $vasara->getPostmanEvent();
-    ```
-
-* Change host of postman url path
-    ```
-    $vasara->changeHost('http://localhost:8000');
+    $vasara->getInfo();
     ```
 
 ### Return value
