@@ -13,7 +13,7 @@ class VasaraServiceProvider extends ServiceProvider
     {
         $this->publishes([
             realpath(__DIR__ . '/../config/vasara.php') => config_path('vasara.php'),
-        ]);
+        ], 'config');
     }
 
     /**

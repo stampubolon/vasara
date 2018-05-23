@@ -5,15 +5,25 @@ Vasara (finnish: hammer) Extract Rest API json file for easy access by user and 
 This package use for laravel only (lumen not tested yet). Extracting a single Rest API json file to an object. Separate value to info, and routes.
 
 ## Rest API Json FIle
-Now only support postman file. Will update for another json file.
+Now only support postman file. We will update for another json file in the future.
 
-### Install
-Install this package with composer using command below.
+### Installation
+Require this package in your composer.json and run composer update (or run composer require composer require dyned/vasara directly).
 ```
 composer require dyned/vasara
 ```
 
-### How to use
+After updating composer, add the ServiceProvider to the providers array in config/app.php
+```
+DynEd\Vasara\VasaraServiceProvider::class
+```
+
+You need to publish the config file for this package. This will add the file config/vasara.php, where you can configure this package.
+```
+$ php artisan vendor:publish --provider="DynEd\Vasara\VasaraServiceProvider" --tag=config
+```
+
+### Usage
 Instantiate a vasara object with json content.
 ```
 $vasara = new Vasara($json);
