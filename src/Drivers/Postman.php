@@ -112,7 +112,7 @@ class Postman extends VasaraDriver
                 $_route->name = $route->name;
                 $_route->description = property_exists($route->request, 'description') ? $route->request->description : '';
                 $_route->method = $route->request->method;
-                $_route->header = $this->convertBody($route->request->header);
+                $_route->header = $this->convertHeader($route->request->header);
                 $_route->body = $this->convertBody($route->request->body);
 
                 $_route->url = new \stdClass();
@@ -133,7 +133,11 @@ class Postman extends VasaraDriver
      */
     protected function convertBody($body = [])
     {
-        return (optional($body)->{optional($body)->mode} ? $this->concatArray(optional($body)->{optional($body)->mode}) : json_encode([]));
+        return (optional($body)->{optional($body)->mode} ?
+            (optional($body)->mode == 'raw' ?
+                optional($body)->{optional($body)->mode} :
+                $this->concatArray(optional($body)->{optional($body)->mode})) :
+            json_encode([]));
     }
 
     /**
@@ -159,7 +163,7 @@ class Postman extends VasaraDriver
 
         foreach ($arrs as $arr) {
             // Authorization defined in project headers
-            if ($arr->key != 'Authorization') {
+            if ($arr->key != 'Content-Type') {
                 $return[$arr->key] = $arr->value;
             }
         }

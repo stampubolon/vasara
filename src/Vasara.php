@@ -7,39 +7,11 @@ use DynEd\Vasara\Exceptions\DriverOutOfBoundException;
 class Vasara
 {
     /**
-     * Info of postman
-     *
-     * @var null
-     */
-    private $postmanInfo = null;
-
-    /**
-     * Item of postman
-     *
-     * @var \Illuminate\Support\Collection|null
-     */
-    private $postmanItem = null;
-
-    /**
-     * Event of postman
-     *
-     * @var \Illuminate\Support\Collection|null
-     */
-    private $postmanEvent = null;
-
-    /**
-     * Collection of all items
-     *
-     * @var \Illuminate\Support\Collection|null
-     */
-    private $items = null;
-
-    /**
      * Default host for routes
      *
      * @var string
      */
-    private $host = 'http://localhost';
+    private $host = '';
 
     /**
      * All available drivers
@@ -48,11 +20,26 @@ class Vasara
      */
     private $availableDriver = ['postman'];
 
-    var     $vasaraJson      = null;
+    /**
+     * Store json here
+     *
+     * @var null
+     */
+    var $vasaraJson = null;
 
-    var     $vasaraObject    = null;
+    /**
+     * Store object from driver here
+     *
+     * @var null
+     */
+    var $vasaraObject = null;
 
-    var     $driver          = '';
+    /**
+     * Choosen driver here
+     *
+     * @var \Illuminate\Config\Repository|mixed|null|string
+     */
+    var $driver = '';
 
     /**
      * Vasara constructor.
@@ -84,9 +71,9 @@ class Vasara
     public function run()
     {
         // Change first character to uppercase
-        $class = 'DynEd\\Vasara\\Drivers\\' . ucfirst($this->driver);
+        $driver = 'DynEd\\Vasara\\Drivers\\' . ucfirst($this->driver);
 
-        $this->vasaraObject = new $class(json_decode($this->vasaraJson), $this->host);
+        $this->vasaraObject = new $driver(json_decode($this->vasaraJson), $this->host);
     }
 
     /**
