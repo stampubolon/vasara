@@ -20,7 +20,7 @@ class Postman extends VasaraDriver
         }
 
         // Define host
-        $this->host = $host;
+        $this->setHost($host);
 
         // Set info
         $this->setInfo($decodedJson->info->name, $decodedJson->info->description);
@@ -136,8 +136,8 @@ class Postman extends VasaraDriver
         return (optional($body)->{optional($body)->mode} ?
             (optional($body)->mode == 'raw' ?
                 optional($body)->{optional($body)->mode} :
-                $this->concatArray(optional($body)->{optional($body)->mode})) :
-            json_encode([]));
+                $this->convertToJson(optional($body)->{optional($body)->mode})) :
+            $this->convertToJson());
     }
 
     /**
@@ -148,7 +148,7 @@ class Postman extends VasaraDriver
      */
     protected function convertHeader($header = [])
     {
-        return (optional($header) ? $this->concatArray($header) : json_encode([]));
+        return (optional($header) ? $this->convertToJson($header) : $this->convertToJson());
     }
 
     /**
@@ -157,18 +157,13 @@ class Postman extends VasaraDriver
      * @param $arrs
      * @return string
      */
-    protected function concatArray($arrs = [])
+    protected function convertToJson($arrs = [])
     {
-        $return = [];
-
-        foreach ($arrs as $arr) {
-            // Authorization defined in project headers
-            if ($arr->key != 'Content-Type') {
-                $return[$arr->key] = $arr->value;
-            }
+        if ( ! is_array($arrs)) {
+            return json_encode([]);
         }
 
-        return json_encode($return);
+        return json_encode($arrs);
     }
 
     /**
