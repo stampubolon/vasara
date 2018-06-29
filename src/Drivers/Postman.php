@@ -136,8 +136,8 @@ class Postman extends VasaraDriver
         return (optional($body)->{optional($body)->mode} ?
             (optional($body)->mode == 'raw' ?
                 optional($body)->{optional($body)->mode} :
-                $this->convertToJson(optional($body)->{optional($body)->mode})) :
-            $this->convertToJson());
+                $this->concatArray(optional($body)->{optional($body)->mode})) :
+            $this->concatArray());
     }
 
     /**
@@ -148,7 +148,7 @@ class Postman extends VasaraDriver
      */
     protected function convertHeader($header = [])
     {
-        return (optional($header) ? $this->convertToJson($header) : $this->convertToJson());
+        return (optional($header) ? $this->concatArray($header) : $this->concatArray());
     }
 
     /**
@@ -157,13 +157,19 @@ class Postman extends VasaraDriver
      * @param $arrs
      * @return string
      */
-    protected function convertToJson($arrs = [])
+    protected function concatArray($arrs = [])
     {
         if ( ! is_array($arrs)) {
             return json_encode([]);
         }
 
-        return json_encode($arrs);
+        $return = [];
+
+        foreach ($arrs as $arr) {
+            $return[$arr->key] = $arr->value;
+        }
+
+        return json_encode($return);
     }
 
     /**
